@@ -1,0 +1,25 @@
+## error_compare figure detail
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=1.0\linewidth]{figures/demo.jpg}
+    \caption{\textbf{Comparison of attention mechanisms under identical compute budget.} 
+All methods use the same input $Q$, $K$, and $V$ tensors extracted from Wan2.1–1.3B~\cite{wan2025wanopenadvancedlargescale} denoising process.
+Computation Pattern (top-left two panels):
+Normalized block-wise FLOPs distribution. The two panels plot query blocks on the horizontal axis and key blocks on the vertical axis. Despite identical FLOPs ($20\%$ full), the proposed Pyramid Sparse Attention (PSA) allows each query block to attend to a much larger portion of KV blocks (70\% active regions), whereas Block Sparse Attention (BSA)~\cite{dao2022flashattentionfastmemoryefficientexact, zhang2025spargeattentionaccuratetrainingfreesparse, xu2025xattentionblocksparseattention} restricts each query to only a narrow subset of KV blocks (20\% active regions), concentrating FLOPs in limited areas.
+Attention Output (bottom row):
+Resulting attention visualizations. PSA closely matches the Full Attention baseline with minimal relative error ($<3\%$), while BSA shows noticeable distortions due to aggressive pruning.}
+
+    \label{fig:psa_comparison}
+    \vspace{-0.5cm}
+\end{figure}
+\label{sec:intro}
+
+## PSA workflow figure detail
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\linewidth]{figures/PSA.png}
+    \caption{\textbf{Overview of the Pyramid Sparse Attention (PSA) framework.}
+PSA adaptively allocates attention computation across hierarchical KV representations (green; lighter shades denote coarser levels). The multi-level mask (blue) determines which KV level each query block attends to. As illustrated, the current attention block assigned to level~4 uses the coarsest KV representation $K_j^4$ and $V_j^4$.}
+\vspace{-0.5cm}
+\label{fig:framework}
+\end{figure}

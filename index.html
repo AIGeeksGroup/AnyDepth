@@ -1,0 +1,1364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	    <meta charset="UTF-8">
+	    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	    <title>AnyDepth: Depth Estimation Made Easy</title>
+	    <link rel="icon" type="image/png" href="figures/anydepth_logo.png">
+	    <link rel="apple-touch-icon" href="figures/anydepth_logo.png">
+	
+	    <!-- Tailwind CSS -->
+	    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- MathJax -->
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+
+    <!-- Custom Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Display', 'Segoe UI', 'Roboto', 'sans-serif'],
+                        mono: ['SF Mono', 'Menlo', 'Monaco', 'Consolas', 'monospace']
+                    },
+                    backdropBlur: {
+                        '3xl': '64px',
+                        '4xl': '96px'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Spring Physics Easing */
+        :root {
+            --spring-easing: cubic-bezier(0.16, 1, 0.3, 1);
+            --spring-duration: 0.8s;
+        }
+
+        /* Organic Fluid Background Orbs */
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.6;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        .orb-1 {
+            width: 600px;
+            height: 600px;
+            background: linear-gradient(135deg, #6B7280 0%, #9CA3AF 100%);
+            top: -200px;
+            left: -100px;
+            animation-delay: 0s;
+        }
+
+        .orb-2 {
+            width: 500px;
+            height: 500px;
+            background: linear-gradient(135deg, #60A5FA 0%, #93C5FD 100%);
+            top: 30%;
+            right: -150px;
+            animation-delay: -7s;
+        }
+
+        .orb-3 {
+            width: 450px;
+            height: 450px;
+            background: linear-gradient(135deg, #818CF8 0%, #A5B4FC 100%);
+            bottom: -100px;
+            left: 20%;
+            animation-delay: -14s;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translate(0, 0) scale(1) rotate(0deg);
+            }
+            25% {
+                transform: translate(50px, -30px) scale(1.05) rotate(5deg);
+            }
+            50% {
+                transform: translate(-20px, 40px) scale(0.95) rotate(-5deg);
+            }
+            75% {
+                transform: translate(-40px, -20px) scale(1.02) rotate(3deg);
+            }
+        }
+
+        /* Glass Card Styles */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(64px);
+            -webkit-backdrop-filter: blur(64px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow:
+                0 8px 32px rgba(99, 102, 241, 0.1),
+                0 2px 8px rgba(0, 0, 0, 0.05),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6);
+        }
+
+        .glass-card-dark {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(64px);
+            -webkit-backdrop-filter: blur(64px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow:
+                0 8px 32px rgba(99, 102, 241, 0.15),
+                0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        /* Pill Button Styles */
+        .pill-btn {
+            transition: all var(--spring-duration) var(--spring-easing);
+        }
+
+        .pill-btn:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 10px 40px rgba(99, 102, 241, 0.2);
+        }
+
+        /* Blur Reveal Animation */
+        @keyframes blurReveal {
+            0% {
+                opacity: 0;
+                filter: blur(10px);
+                transform: translateY(10px);
+            }
+            100% {
+                opacity: 1;
+                filter: blur(0);
+                transform: translateY(0);
+            }
+        }
+
+        .blur-reveal {
+            animation: blurReveal 0.8s var(--spring-easing) forwards;
+        }
+
+        .blur-reveal-delay-1 { animation-delay: 0.1s; opacity: 0; }
+        .blur-reveal-delay-2 { animation-delay: 0.2s; opacity: 0; }
+        .blur-reveal-delay-3 { animation-delay: 0.3s; opacity: 0; }
+        .blur-reveal-delay-4 { animation-delay: 0.4s; opacity: 0; }
+        .blur-reveal-delay-5 { animation-delay: 0.5s; opacity: 0; }
+
+        /* Text Blur-in Effect for Chat */
+        @keyframes textBlurIn {
+            0% {
+                opacity: 0;
+                filter: blur(8px);
+            }
+            100% {
+                opacity: 1;
+                filter: blur(0);
+            }
+        }
+
+        .text-blur-in {
+            animation: textBlurIn 0.3s ease-out forwards;
+        }
+
+        /* Floating Badge */
+        .speed-badge {
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% {
+                box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+            }
+            50% {
+                box-shadow: 0 0 30px rgba(16, 185, 129, 0.5);
+            }
+        }
+
+        /* Table Styles - Modern Booktabs */
+        .booktabs-table {
+            font-variant-numeric: tabular-nums;
+        }
+
+        .booktabs-table thead tr {
+            border-top: 2px solid #374151;
+            border-bottom: 1px solid #374151;
+        }
+
+        .booktabs-table tbody tr:last-child {
+            border-bottom: 2px solid #374151;
+        }
+
+        .booktabs-table tbody tr {
+            transition: background-color 0.2s ease;
+        }
+
+        .booktabs-table tbody tr:hover {
+            background-color: rgba(99, 102, 241, 0.05);
+        }
+
+        .booktabs-table .highlight-row {
+            background-color: rgba(59, 130, 246, 0.1);
+        }
+
+        .booktabs-table .highlight-row:hover {
+            background-color: rgba(59, 130, 246, 0.15);
+        }
+
+        /* Algorithm/Pseudocode Styles */
+        .algorithm-block {
+            font-family: 'SF Mono', 'Menlo', 'Monaco', monospace;
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+
+        .algorithm-block .line-number {
+            color: #9CA3AF;
+            user-select: none;
+            width: 2rem;
+            text-align: right;
+            padding-right: 1rem;
+        }
+
+        .algorithm-block .keyword {
+            color: #7C3AED;
+            font-weight: 600;
+        }
+
+        .algorithm-block .comment {
+            color: #6B7280;
+            font-style: italic;
+        }
+
+        .algorithm-block .function {
+            color: #2563EB;
+        }
+
+        /* Bento Grid */
+        .bento-grid {
+            display: grid;
+            gap: 1.5rem;
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        @media (max-width: 768px) {
+            .bento-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Spinner */
+        .spinner {
+            border: 3px solid rgba(99, 102, 241, 0.2);
+            border-top-color: #6366F1;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Section transitions */
+        .section-fade {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s var(--spring-easing);
+        }
+
+        .section-fade.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Video container styling */
+        .video-container {
+            background: linear-gradient(135deg, #1F2937 0%, #111827 100%);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        /* Chat bubble */
+        .chat-bubble {
+            max-width: 80%;
+        }
+
+        .chat-bubble.user {
+            background: linear-gradient(135deg, #6366F1 0%, #818CF8 100%);
+            color: white;
+            margin-left: auto;
+        }
+
+        .chat-bubble.assistant {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 text-gray-900 overflow-x-hidden">
+
+    <!-- Animated Background Orbs -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="relative z-10">
+
+        <!-- Hero Section -->
+        <section class="min-h-screen flex items-center justify-center px-6 py-20">
+            <div class="max-w-5xl mx-auto text-center">
+                <!-- Title -->
+                <h1 class="blur-reveal text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-6">
+                    <span class="bg-gradient-to-r from-indigo-600 via-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                        AnyDepth
+                    </span>
+                </h1>
+
+                <!-- Subtitle -->
+                <p class="blur-reveal blur-reveal-delay-1 text-2xl md:text-3xl text-gray-600 max-w-3xl mx-auto mb-8 leading-relaxed">
+                    Depth Estimation Made Easy
+                </p>
+
+                <!-- Authors -->
+                <div class="blur-reveal blur-reveal-delay-2 mb-10">
+                    <div class="flex flex-wrap justify-center gap-x-6 gap-y-2 text-lg text-gray-700 mb-3">
+                        <span class="font-medium">Zeyu Ren<sup class="text-indigo-500">1*</sup></span>
+                        <span class="font-medium"><a href="https://steve-zeyu-zhang.github.io/">Zeyu Zhang</a><sup class="text-indigo-500">2*†</sup></span>
+                        <span class="font-medium">Wukai Li<sup class="text-indigo-500">2</sup></span>
+                        <span class="font-medium">Qingxiang Liu<sup class="text-indigo-500">3</sup></span>
+                        <span class="font-medium"><a href="https://ha0tang.github.io/">Hao Tang</a><sup class="text-indigo-500">2‡</sup></span>
+                    </div>
+	                    <p class="text-gray-500 flex flex-wrap justify-center gap-x-6 gap-y-1">
+	                        <span><sup class="text-indigo-500">1</sup>The University of Melbourne</span>
+	                        <span><sup class="text-indigo-500">2</sup>Peking University</span>
+                            <span><sup class="text-indigo-500">3</sup>Shanghai University of Engineering Science</span>
+	                    </p>
+	                    <p class="text-gray-400 text-sm mt-2 flex flex-wrap justify-center gap-x-6 gap-y-1">
+	                        <span><sup class="text-indigo-500">*</sup>Equal contribution.</span>
+	                        <span><sup class="text-indigo-500">†</sup>Project lead.</span>
+	                        <span><sup class="text-indigo-500">‡</sup>Corresponding author.</span>
+	                    </p>
+                </div>
+
+                <!-- Action Buttons -->
+	                <div class="blur-reveal blur-reveal-delay-3 flex flex-wrap justify-center gap-4">
+	                    <a href="https://arxiv.org/abs/2601.02760" target="_blank" class="pill-btn glass-card px-8 py-4 rounded-full flex items-center gap-3 text-gray-800 font-medium hover:bg-white/80">
+	                        <i class="fa-solid fa-file-pdf text-red-500"></i>
+	                        Paper
+	                    </a>
+                    <a href="https://github.com/AIGeeksGroup/AnyDepth" target="_blank" class="pill-btn glass-card px-8 py-4 rounded-full flex items-center gap-3 text-gray-800 font-medium hover:bg-white/80">
+                        <i class="fa-brands fa-github"></i>
+                        Code
+                    </a>
+	                    <a href="https://huggingface.co/AIGeeksGroup/AnyDepth" target="_blank" class="pill-btn glass-card px-8 py-4 rounded-full flex items-center gap-3 text-gray-800 font-medium hover:bg-white/80">
+	                        <i class="fa-solid fa-cube text-yellow-500"></i>
+	                        Model
+	                    </a>
+	                </div>
+
+	                <div class="blur-reveal blur-reveal-delay-4 mt-12">
+	                    <p class="text-center italic text-gray-500 text-lg md:text-xl max-w-3xl mx-auto leading-relaxed">
+	                        &ldquo;Simplicity is prerequisite for reliability.&rdquo; &mdash; Edsger W. Dijkstra
+	                    </p>
+	                </div>
+	
+	                <!-- Scroll Indicator -->
+	                <div class="blur-reveal blur-reveal-delay-5 mt-20 animate-bounce">
+	                    <i class="fa-solid fa-chevron-down text-gray-400 text-2xl"></i>
+	                </div>
+            </div>
+        </section>
+
+        <!-- Abstract Section -->
+        <section class="py-20 px-6">
+            <div class="max-w-4xl mx-auto">
+                <div class="glass-card rounded-3xl p-10 section-fade">
+	                    <h2 class="text-3xl font-bold mb-6 text-gray-800">
+	                        <i class="fa-solid fa-quote-left text-indigo-400 mr-3"></i>
+	                        Abstract
+	                    </h2>
+
+	                    <div class="mb-8">
+	                        <video class="w-full rounded-2xl shadow-lg" controls autoplay muted loop playsinline preload="metadata">
+	                            <source src="./AnyDepth_teaser.mp4" type="video/mp4">
+	                            Your browser does not support the video tag.
+	                        </video>
+	                    </div>
+	
+                        <p class="text-lg text-gray-700 leading-relaxed">
+                            <strong>TL;DR:</strong> We present <strong>AnyDepth</strong>, a simple and efficient training framework for zero-shot monocular depth estimation, which achieves impressive performance across a variety of indoor and outdoor scenes.
+                        </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Interactive Demos Section -->
+        <section class="py-20 px-6">
+            <div class="max-w-6xl mx-auto">
+                <h2 class="text-4xl font-bold text-center mb-4 text-gray-800 section-fade">
+                    Real World Results
+                </h2>
+                <p class="text-xl text-gray-600 text-center mb-16 section-fade">
+                    We use the WHEELTEC R550 as the mobile platform for real-world evaluation.
+                </p>
+
+	                <!-- Scene 1 -->
+	                <div class="glass-card rounded-3xl p-8 mb-12 section-fade">
+	                    <h3 class="text-2xl font-bold text-gray-800 mb-6">Scene 1</h3>
+	
+	                    <div class="space-y-8">
+	                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+	                            <div>
+	                                <p class="text-sm font-semibold text-gray-700 mb-2 text-center">RGB</p>
+	                                <div class="video-container rounded-2xl overflow-hidden">
+	                                    <video class="w-full h-auto" controls autoplay muted loop playsinline preload="metadata">
+	                                        <source src="video_output/rgb/scene01_rgb.mp4" type="video/mp4">
+	                                        Your browser does not support the video tag.
+	                                    </video>
+	                                </div>
+	                            </div>
+	                            <div>
+	                                <p class="text-sm font-semibold text-gray-700 mb-2 text-center">GT Depth</p>
+	                                <div class="video-container rounded-2xl overflow-hidden">
+	                                    <video class="w-full h-auto" controls autoplay muted loop playsinline preload="metadata">
+	                                        <source src="video_output/gt_depth/scene01_depth.mp4" type="video/mp4">
+	                                        Your browser does not support the video tag.
+	                                    </video>
+	                                </div>
+	                            </div>
+	                        </div>
+	
+	                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+	                            <div>
+	                                <p class="text-sm font-semibold text-gray-700 mb-2 text-center">Depth Anything V2+DPT</p>
+	                                <div class="video-container rounded-2xl overflow-hidden">
+	                                    <video class="w-full h-auto" controls autoplay muted loop playsinline preload="metadata">
+	                                        <source src="video_output/dav2_dpt/scene01_rgb.mp4" type="video/mp4">
+	                                        Your browser does not support the video tag.
+	                                    </video>
+	                                </div>
+	                            </div>
+	                            <div>
+	                                <p class="text-sm md:text-base font-black mb-2 text-center bg-gradient-to-r from-indigo-600 via-blue-600 to-indigo-600 bg-clip-text text-transparent">Depth Anything V2+SDT (Ours)</p>
+	                                <div class="video-container rounded-2xl overflow-hidden">
+	                                    <video class="w-full h-auto" controls autoplay muted loop playsinline preload="metadata">
+	                                        <source src="video_output/dav2_sdt/scene01_rgb.mp4" type="video/mp4">
+	                                        Your browser does not support the video tag.
+	                                    </video>
+	                                </div>
+	                            </div>
+	                        </div>
+	
+	                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+	                            <div>
+	                                <p class="text-sm font-semibold text-gray-700 mb-2 text-center">Depth Anything V3+DPT</p>
+	                                <div class="video-container rounded-2xl overflow-hidden">
+	                                    <video class="w-full h-auto" controls autoplay muted loop playsinline preload="metadata">
+	                                        <source src="video_output/da3_dpt/scene01_rgb.mp4" type="video/mp4">
+	                                        Your browser does not support the video tag.
+	                                    </video>
+	                                </div>
+	                            </div>
+	                            <div>
+	                                <p class="text-sm font-semibold text-gray-700 mb-2 text-center">Depth Anything V3+DualDPT</p>
+	                                <div class="video-container rounded-2xl overflow-hidden">
+	                                    <video class="w-full h-auto" controls autoplay muted loop playsinline preload="metadata">
+	                                        <source src="video_output/da3_dualdpt/scene01_rgb.mp4" type="video/mp4">
+	                                        Your browser does not support the video tag.
+	                                    </video>
+	                                </div>
+	                            </div>
+	                            <div>
+	                                <p class="text-sm md:text-base font-black mb-2 text-center bg-gradient-to-r from-indigo-600 via-blue-600 to-indigo-600 bg-clip-text text-transparent">Depth Anything V3+SDT (Ours)</p>
+	                                <div class="video-container rounded-2xl overflow-hidden">
+	                                    <video class="w-full h-auto" controls autoplay muted loop playsinline preload="metadata">
+	                                        <source src="video_output/da3_sdt/scene01_rgb.mp4" type="video/mp4">
+	                                        Your browser does not support the video tag.
+	                                    </video>
+	                                </div>
+	                            </div>
+	                        </div>
+	                    </div>
+	                </div>
+	
+	                <!-- Scene 2 -->
+	                <div class="glass-card rounded-3xl p-8 mb-12 section-fade">
+	                    <h3 class="text-2xl font-bold text-gray-800 mb-6">Scene 2</h3>
+	
+	                    <div class="space-y-8">
+	                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+	                            <div>
+	                                <p class="text-sm font-semibold text-gray-700 mb-2 text-center">RGB</p>
+	                                <div class="video-container rounded-2xl overflow-hidden">
+	                                    <video class="w-full h-auto" controls autoplay muted loop playsinline preload="metadata">
+	                                        <source src="video_output/rgb/scene02_rgb.mp4" type="video/mp4">
+	                                        Your browser does not support the video tag.
+	                                    </video>
+	                                </div>
+	                            </div>
+	                            <div>
+	                                <p class="text-sm font-semibold text-gray-700 mb-2 text-center">GT Depth</p>
+	                                <div class="video-container rounded-2xl overflow-hidden">
+	                                    <video class="w-full h-auto" controls autoplay muted loop playsinline preload="metadata">
+	                                        <source src="video_output/gt_depth/scene02_depth.mp4" type="video/mp4">
+	                                        Your browser does not support the video tag.
+	                                    </video>
+	                                </div>
+	                            </div>
+	                        </div>
+	
+	                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+	                            <div>
+	                                <p class="text-sm font-semibold text-gray-700 mb-2 text-center">Depth Anything V2+DPT</p>
+	                                <div class="video-container rounded-2xl overflow-hidden">
+	                                    <video class="w-full h-auto" controls autoplay muted loop playsinline preload="metadata">
+	                                        <source src="video_output/dav2_dpt/scene02_rgb.mp4" type="video/mp4">
+	                                        Your browser does not support the video tag.
+	                                    </video>
+	                                </div>
+	                            </div>
+	                            <div>
+	                                <p class="text-sm md:text-base font-black mb-2 text-center bg-gradient-to-r from-indigo-600 via-blue-600 to-indigo-600 bg-clip-text text-transparent">Depth Anything V2+SDT (Ours)</p>
+	                                <div class="video-container rounded-2xl overflow-hidden">
+	                                    <video class="w-full h-auto" controls autoplay muted loop playsinline preload="metadata">
+	                                        <source src="video_output/dav2_sdt/scene02_rgb.mp4" type="video/mp4">
+	                                        Your browser does not support the video tag.
+	                                    </video>
+	                                </div>
+	                            </div>
+	                        </div>
+	
+	                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+	                            <div>
+	                                <p class="text-sm font-semibold text-gray-700 mb-2 text-center">Depth Anything V3+DPT</p>
+	                                <div class="video-container rounded-2xl overflow-hidden">
+	                                    <video class="w-full h-auto" controls autoplay muted loop playsinline preload="metadata">
+	                                        <source src="video_output/da3_dpt/scene02_rgb.mp4" type="video/mp4">
+	                                        Your browser does not support the video tag.
+	                                    </video>
+	                                </div>
+	                            </div>
+	                            <div>
+	                                <p class="text-sm font-semibold text-gray-700 mb-2 text-center">Depth Anything V3+DualDPT</p>
+	                                <div class="video-container rounded-2xl overflow-hidden">
+	                                    <video class="w-full h-auto" controls autoplay muted loop playsinline preload="metadata">
+	                                        <source src="video_output/da3_dualdpt/scene02_rgb.mp4" type="video/mp4">
+	                                        Your browser does not support the video tag.
+	                                    </video>
+	                                </div>
+	                            </div>
+	                            <div>
+	                                <p class="text-sm md:text-base font-black mb-2 text-center bg-gradient-to-r from-indigo-600 via-blue-600 to-indigo-600 bg-clip-text text-transparent">Depth Anything V3+SDT (Ours)</p>
+	                                <div class="video-container rounded-2xl overflow-hidden">
+	                                    <video class="w-full h-auto" controls autoplay muted loop playsinline preload="metadata">
+	                                        <source src="video_output/da3_sdt/scene02_rgb.mp4" type="video/mp4">
+	                                        Your browser does not support the video tag.
+	                                    </video>
+	                                </div>
+	                            </div>
+	                        </div>
+	                    </div>
+	                </div>
+	
+	                <!-- Scene 3 -->
+	                <div class="glass-card rounded-3xl p-8 mb-12 section-fade">
+	                    <h3 class="text-2xl font-bold text-gray-800 mb-6">Scene 3</h3>
+	
+	                    <div class="space-y-8">
+	                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+	                            <div>
+	                                <p class="text-sm font-semibold text-gray-700 mb-2 text-center">RGB</p>
+	                                <div class="video-container rounded-2xl overflow-hidden">
+	                                    <video class="w-full h-auto" controls autoplay muted loop playsinline preload="metadata">
+	                                        <source src="video_output/rgb/scene03_rgb.mp4" type="video/mp4">
+	                                        Your browser does not support the video tag.
+	                                    </video>
+	                                </div>
+	                            </div>
+	                            <div>
+	                                <p class="text-sm font-semibold text-gray-700 mb-2 text-center">GT Depth</p>
+	                                <div class="video-container rounded-2xl overflow-hidden">
+	                                    <video class="w-full h-auto" controls autoplay muted loop playsinline preload="metadata">
+	                                        <source src="video_output/gt_depth/scene03_depth.mp4" type="video/mp4">
+	                                        Your browser does not support the video tag.
+	                                    </video>
+	                                </div>
+	                            </div>
+	                        </div>
+	
+	                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+	                            <div>
+	                                <p class="text-sm font-semibold text-gray-700 mb-2 text-center">Depth Anything V2+DPT</p>
+	                                <div class="video-container rounded-2xl overflow-hidden">
+	                                    <video class="w-full h-auto" controls autoplay muted loop playsinline preload="metadata">
+	                                        <source src="video_output/dav2_dpt/scene03_rgb.mp4" type="video/mp4">
+	                                        Your browser does not support the video tag.
+	                                    </video>
+	                                </div>
+	                            </div>
+	                            <div>
+	                                <p class="text-sm md:text-base font-black mb-2 text-center bg-gradient-to-r from-indigo-600 via-blue-600 to-indigo-600 bg-clip-text text-transparent">Depth Anything V2+SDT (Ours)</p>
+	                                <div class="video-container rounded-2xl overflow-hidden">
+	                                    <video class="w-full h-auto" controls autoplay muted loop playsinline preload="metadata">
+	                                        <source src="video_output/dav2_sdt/scene03_rgb.mp4" type="video/mp4">
+	                                        Your browser does not support the video tag.
+	                                    </video>
+	                                </div>
+	                            </div>
+	                        </div>
+	
+	                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+	                            <div>
+	                                <p class="text-sm font-semibold text-gray-700 mb-2 text-center">Depth Anything V3+DPT</p>
+	                                <div class="video-container rounded-2xl overflow-hidden">
+	                                    <video class="w-full h-auto" controls autoplay muted loop playsinline preload="metadata">
+	                                        <source src="video_output/da3_dpt/scene03_rgb.mp4" type="video/mp4">
+	                                        Your browser does not support the video tag.
+	                                    </video>
+	                                </div>
+	                            </div>
+	                            <div>
+	                                <p class="text-sm font-semibold text-gray-700 mb-2 text-center">Depth Anything V3+DualDPT</p>
+	                                <div class="video-container rounded-2xl overflow-hidden">
+	                                    <video class="w-full h-auto" controls autoplay muted loop playsinline preload="metadata">
+	                                        <source src="video_output/da3_dualdpt/scene03_rgb.mp4" type="video/mp4">
+	                                        Your browser does not support the video tag.
+	                                    </video>
+	                                </div>
+	                            </div>
+	                            <div>
+	                                <p class="text-sm md:text-base font-black mb-2 text-center bg-gradient-to-r from-indigo-600 via-blue-600 to-indigo-600 bg-clip-text text-transparent">Depth Anything V3+SDT (Ours)</p>
+	                                <div class="video-container rounded-2xl overflow-hidden">
+	                                    <video class="w-full h-auto" controls autoplay muted loop playsinline preload="metadata">
+	                                        <source src="video_output/da3_sdt/scene03_rgb.mp4" type="video/mp4">
+	                                        Your browser does not support the video tag.
+	                                    </video>
+	                                </div>
+	                            </div>
+	                        </div>
+	                    </div>
+	                </div>
+
+
+		                <!-- Table 2 & 3: Side by side -->
+		                <div class="grid md:grid-cols-2 gap-8">
+		                    <!-- Table 2: Jetson Orin Nano Latency -->
+		                    <div class="glass-card rounded-3xl p-6 section-fade">
+		                        <h3 class="text-lg font-bold text-gray-800 mb-2">
+		                            <i class="fa-solid fa-stopwatch text-indigo-500 mr-2"></i>
+		                            Jetson Orin Nano Latency
+		                        </h3>
+		                        <p class="text-gray-600 text-sm mb-4">
+		                            Inference latency comparison of SDT and DPT decoders on a Jetson Orin Nano (4GB).
+		                        </p>
+		
+		                        <table class="booktabs-table w-full text-sm">
+		                            <thead>
+		                                <tr class="text-left">
+		                                    <th class="py-2 px-3 font-bold">Resolution</th>
+		                                    <th class="py-2 px-3 font-bold">Decoder</th>
+		                                    <th class="py-2 px-3 font-bold text-right">Latency (ms)↓</th>
+		                                    <th class="py-2 px-3 font-bold text-right">FPS↑</th>
+		                                </tr>
+		                            </thead>
+		                            <tbody>
+		                                <tr>
+		                                    <td class="py-2 px-3 font-medium" rowspan="2">256&times;256</td>
+		                                    <td class="py-2 px-3">DPT</td>
+		                                    <td class="py-2 px-3 text-right">305.65</td>
+		                                    <td class="py-2 px-3 text-right">3.3</td>
+		                                </tr>
+		                                <tr>
+		                                    <td class="py-2 px-3 font-bold text-indigo-600">SDT (Ours)</td>
+		                                    <td class="py-2 px-3 text-right font-bold">213.35</td>
+		                                    <td class="py-2 px-3 text-right font-bold">4.7</td>
+		                                </tr>
+		                                <tr class="border-t border-gray-200">
+		                                    <td class="py-2 px-3 font-medium" rowspan="2">512&times;512</td>
+		                                    <td class="py-2 px-3">DPT</td>
+		                                    <td class="py-2 px-3 text-right">1107.64</td>
+		                                    <td class="py-2 px-3 text-right">0.9</td>
+		                                </tr>
+		                                <tr>
+		                                    <td class="py-2 px-3 font-bold text-indigo-600">SDT (Ours)</td>
+		                                    <td class="py-2 px-3 text-right font-bold">831.48</td>
+		                                    <td class="py-2 px-3 text-right font-bold">1.2</td>
+		                                </tr>
+		                            </tbody>
+		                        </table>
+		                    </div>
+		
+		                    <!-- Table 3: Jetson Orin Nano Memory -->
+		                    <div class="glass-card rounded-3xl p-6 section-fade">
+		                        <h3 class="text-lg font-bold text-gray-800 mb-2">
+		                            <i class="fa-solid fa-memory text-indigo-500 mr-2"></i>
+		                            Jetson Orin Nano Memory
+		                        </h3>
+		                        <p class="text-gray-600 text-sm mb-4">
+		                            Peak GPU memory usage during inference at 256&times;256 resolution on Jetson Orin Nano (4GB).
+		                        </p>
+		
+		                        <table class="booktabs-table w-full text-sm">
+		                            <thead>
+		                                <tr class="text-left">
+		                                    <th class="py-2 px-3 font-bold">Decoder</th>
+		                                    <th class="py-2 px-3 font-bold text-right">Peak Memory (MB)↓</th>
+		                                </tr>
+		                            </thead>
+		                            <tbody>
+		                                <tr>
+		                                    <td class="py-2 px-3">DPT</td>
+		                                    <td class="py-2 px-3 text-right">589.5</td>
+		                                </tr>
+		                                <tr class="highlight-row">
+		                                    <td class="py-2 px-3 font-bold text-indigo-600">SDT (Ours)</td>
+		                                    <td class="py-2 px-3 text-right font-bold">395.2</td>
+		                                </tr>
+		                            </tbody>
+		                        </table>
+		                    </div>
+		                </div>
+
+
+            </div>
+        </section>
+
+        <section class="py-20 px-6">
+            <div class="max-w-6xl mx-auto">
+                <h2 class="text-4xl font-bold text-center mb-4 text-gray-800 section-fade">
+                    Method
+                </h2>
+
+                <div class="bento-grid section-fade">
+                    <div class="glass-card rounded-3xl p-6 col-span-2">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">
+                            <i class="fa-solid fa-diagram-project text-indigo-500 mr-2"></i>
+                            Overview
+                        </h3>
+                        <div class="bg-white/50 rounded-2xl p-4 mb-4">
+                            <img src="figures/anydepth-1.png" alt="Your browser does not support the image tag" class="w-full h-auto rounded-xl">
+                        </div>
+                        <p class="text-gray-600 text-sm leading-relaxed">
+                            <strong>AnyDepth architecture overview.</strong>
+                            The input image is encoded into tokens by a frozen DINOv3 backbone network, then decoded by our lightweight SDT decoder. Tokens undergo only a single projection and weighted fusion. The Spatial Detail Enhancer (SDE) module ensures finer-grained predictions. The feature map is upsampled by an efficient and learnable upsampler dysample, and the depth is finally output by the head.
+                        </p>
+                    </div>
+
+
+                    <div class="glass-card rounded-3xl p-6 col-span-2">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">
+                            <i class="fa-solid fa-scale-balanced text-indigo-500 mr-2"></i>
+                            Simple Depth Transformer (SDT)
+                        </h3>
+                        <p class="text-gray-600 text-sm leading-relaxed">
+                            Our decoder adopts a simple single-path fusion and reconstruction strategy, aiming to take advantage of the high-resolution feature of DINOv3 and further unleash its performance at high resolution. We first project the tokens extracted from the encoder into a 256-dimensional space using a linear layer followed by a GELU non-linearity, which preserves sufficient informative content while substantially reducing the computational overhead in the subsequent decoding stages. For the class token, we keep the same processing as DPT, concatenate it with the spatial token, and then fuse it through the learnable projection.
+                        </p>
+                    </div>
+
+                    <div class="glass-card rounded-3xl p-6 col-span-2">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">
+                            <i class="fa-solid fa-scale-balanced text-indigo-500 mr-2"></i>
+                            SDT vs. DPT
+                        </h3>
+                        <p class="text-gray-600 text-sm leading-relaxed">
+                            A key difference between SDT and DPT is the order of feature reassembly. DPT employs a reassemble-fusion strategy. Specifically, DPT first applies the reassemble module to the tokens extracted by each Transformer layer, mapping the tokens to feature maps of different scales. These feature maps are then fused in a cascade across scales, which inevitably introduces multiple branches and repeated cross-scale alignment overhead. In contrast, SDT employs a fusion-reassemble strategy, directly projecting and fusing groups of tokens. Only after this stage do we perform spatial reassembly and upsampling along a single path. This fusion-reassemble strategy avoids the high cost of per-layer token reassembly and feature map cross-scale alignment, making it more efficient and stable, especially when processing high-resolution inputs.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <section class="py-20 px-6">
+            <div class="max-w-6xl mx-auto">
+                <h2 class="text-4xl font-bold text-center mb-4 text-gray-800 section-fade">
+                    Efficiency
+                </h2>
+
+                <div class="bento-grid section-fade">
+                    <div class="glass-card rounded-3xl p-6 col-span-2">
+                        <div class="bg-white/50 rounded-2xl p-4">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+		                                <div>
+		                                    <p class="text-sm font-semibold text-gray-700 mb-2 text-center">(a) Model Comparison</p>
+		                                    <img src="figures/model_comparison-1.png" alt="Model Comparison" class="w-full h-auto rounded-xl">
+		                                </div>
+		                                <div>
+		                                    <p class="text-sm font-semibold text-gray-700 mb-2 text-center">(b) FLOPs Comparison</p>
+		                                    <img src="figures/flops_comparison-1.png" alt="FLOPs Comparison" class="w-full h-auto rounded-xl">
+		                                </div>
+		                                <div>
+		                                    <p class="text-sm font-semibold text-gray-700 mb-2 text-center">(c) Inference Time Comparison</p>
+		                                    <img src="figures/inference_time_comparison-1.png" alt="Inference Time Comparison" class="w-full h-auto rounded-xl">
+		                                </div>
+                            </div>
+                        </div>
+		                        <p class="text-gray-600 text-sm leading-relaxed mt-4">
+		                            Comparison of the number of parameters (left), computational complexity (mid), and Inference time (right)
+		                            of AnyDepth and DPT for different model sizes and input resolutions. Our method significantly
+		                            reduces the number of model parameters and computational cost while maintaining competitive
+		                            accuracy. Moreover, our method consistently achieves lower latency,
+		                            especially at higher resolutions.
+		                        </p>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+
+        <section class="py-20 px-6">
+            <div class="max-w-6xl mx-auto">
+                <h2 class="text-4xl font-bold text-center mb-4 text-gray-800 section-fade">
+                    Dataset Quality
+                </h2>
+
+                <div class="bento-grid section-fade">
+                    <div class="glass-card rounded-3xl p-6 col-span-2">
+                        <div class="bg-white/50 rounded-2xl p-4">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div>
+                                    <p class="text-sm font-semibold text-gray-700 mb-2 text-center">(a) Total Score</p>
+                                    <img src="figures/overall-1.png" alt="Total Score" class="w-full h-auto rounded-xl">
+                                </div>
+                                <div>
+                                    <p class="text-sm font-semibold text-gray-700 mb-2 text-center">(b) Depth Distribution Score</p>
+                                    <img src="figures/distribution-1.png" alt="Depth Distribution Score" class="w-full h-auto rounded-xl">
+                                </div>
+                                <div>
+                                    <p class="text-sm font-semibold text-gray-700 mb-2 text-center">(c) Gradient Continuity Score</p>
+                                    <img src="figures/gradient-1.png" alt="Gradient Continuity Score" class="w-full h-auto rounded-xl">
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-gray-600 text-sm leading-relaxed mt-4">
+                            Dataset quality across the Total Score, Depth Distribution Score, and Gradient Continuity Score (higher is better).
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+
+
+
+        <!-- Results Section -->
+        <section class="py-20 px-6">
+            <div class="max-w-6xl mx-auto">
+                <h2 class="text-4xl font-bold text-center mb-4 text-gray-800 section-fade">
+                    Experimental Results
+                </h2>
+
+	                <!-- Table 1: Zero-shot Affine-invariant Depth -->
+	                <div class="glass-card rounded-3xl p-8 mb-12 section-fade overflow-x-auto">
+	                    <h3 class="text-xl font-bold text-gray-800 mb-2">
+	                        <i class="fa-solid fa-table text-indigo-500 mr-2"></i>
+	                        Quantitative Comparison of Zero-shot Affine-invariant Depth Estimation
+	                    </h3>
+	                    <p class="text-gray-600 text-sm mb-6">
+	                        <strong>Quantitative comparison of zero-shot affine-invariant depth estimation.</strong>
+	                        Lower AbsRel values are better; higher δ<sub>1</sub> values are better. DINOv3 uses the ViT-7B encoder, and Depth Anything v2 (DAv2) is trained on 62.6M datasets. For fair comparison, the baseline (DPT) uses a frozen DINOv3 encoder and DPT head, while our method replaces the DPT head with the proposed SDT. The bold numbers in the table refer to the best results between DPT and AnyDepth.
+	                    </p>
+	
+	                    <table class="booktabs-table w-full text-xs">
+	                        <thead>
+	                            <tr class="text-left">
+	                                <th class="py-3 px-3 font-bold" rowspan="2">Method</th>
+	                                <th class="py-3 px-3 font-bold" rowspan="2">Training Data↓</th>
+	                                <th class="py-3 px-3 font-bold" rowspan="2">Encoder</th>
+	                                <th class="py-3 px-3 font-bold text-right" rowspan="2">#Params (M)↓</th>
+	                                <th class="py-3 px-3 font-bold text-center" colspan="2">NYUv2</th>
+	                                <th class="py-3 px-3 font-bold text-center" colspan="2">KITTI</th>
+	                                <th class="py-3 px-3 font-bold text-center" colspan="2">ETH3D</th>
+	                                <th class="py-3 px-3 font-bold text-center" colspan="2">ScanNet</th>
+	                                <th class="py-3 px-3 font-bold text-center" colspan="2">DIODE</th>
+	                            </tr>
+	                            <tr class="text-left">
+	                                <th class="py-2 px-3 font-bold text-center">AbsRel↓</th>
+	                                <th class="py-2 px-3 font-bold text-center">δ<sub>1</sub>↑</th>
+	                                <th class="py-2 px-3 font-bold text-center">AbsRel↓</th>
+	                                <th class="py-2 px-3 font-bold text-center">δ<sub>1</sub>↑</th>
+	                                <th class="py-2 px-3 font-bold text-center">AbsRel↓</th>
+	                                <th class="py-2 px-3 font-bold text-center">δ<sub>1</sub>↑</th>
+	                                <th class="py-2 px-3 font-bold text-center">AbsRel↓</th>
+	                                <th class="py-2 px-3 font-bold text-center">δ<sub>1</sub>↑</th>
+	                                <th class="py-2 px-3 font-bold text-center">AbsRel↓</th>
+	                                <th class="py-2 px-3 font-bold text-center">δ<sub>1</sub>↑</th>
+	                            </tr>
+	                        </thead>
+	                        <tbody>
+	                            <tr>
+	                                <td class="py-2 px-3 font-medium">DINOv3</td>
+	                                <td class="py-2 px-3">595K</td>
+	                                <td class="py-2 px-3">ViT-7B</td>
+	                                <td class="py-2 px-3 text-right">91.19</td>
+	                                <td class="py-2 px-3 text-center">4.3</td>
+	                                <td class="py-2 px-3 text-center">98.0</td>
+	                                <td class="py-2 px-3 text-center">7.3</td>
+	                                <td class="py-2 px-3 text-center">96.7</td>
+	                                <td class="py-2 px-3 text-center">5.4</td>
+	                                <td class="py-2 px-3 text-center">97.5</td>
+	                                <td class="py-2 px-3 text-center">4.4</td>
+	                                <td class="py-2 px-3 text-center">98.1</td>
+	                                <td class="py-2 px-3 text-center">25.6</td>
+	                                <td class="py-2 px-3 text-center">82.2</td>
+	                            </tr>
+	
+	                            <tr class="border-t border-gray-200">
+	                                <td class="py-2 px-3 font-medium" rowspan="3">DAv2</td>
+	                                <td class="py-2 px-3" rowspan="3">62.6M</td>
+	                                <td class="py-2 px-3">ViT-S</td>
+	                                <td class="py-2 px-3 text-right">71.8</td>
+	                                <td class="py-2 px-3 text-center">5.3</td>
+	                                <td class="py-2 px-3 text-center">97.3</td>
+	                                <td class="py-2 px-3 text-center">7.8</td>
+	                                <td class="py-2 px-3 text-center">93.6</td>
+	                                <td class="py-2 px-3 text-center">14.2</td>
+	                                <td class="py-2 px-3 text-center">85.1</td>
+	                                <td class="py-2 px-3 text-center text-gray-400">--</td>
+	                                <td class="py-2 px-3 text-center text-gray-400">--</td>
+	                                <td class="py-2 px-3 text-center">7.3</td>
+	                                <td class="py-2 px-3 text-center">94.2</td>
+	                            </tr>
+	                            <tr>
+	                                <td class="py-2 px-3">ViT-B</td>
+	                                <td class="py-2 px-3 text-right">162.1</td>
+	                                <td class="py-2 px-3 text-center">4.9</td>
+	                                <td class="py-2 px-3 text-center">97.6</td>
+	                                <td class="py-2 px-3 text-center">7.8</td>
+	                                <td class="py-2 px-3 text-center">93.9</td>
+	                                <td class="py-2 px-3 text-center">13.7</td>
+	                                <td class="py-2 px-3 text-center">85.8</td>
+	                                <td class="py-2 px-3 text-center text-gray-400">--</td>
+	                                <td class="py-2 px-3 text-center text-gray-400">--</td>
+	                                <td class="py-2 px-3 text-center">6.8</td>
+	                                <td class="py-2 px-3 text-center">95.0</td>
+	                            </tr>
+	                            <tr>
+	                                <td class="py-2 px-3">ViT-L</td>
+	                                <td class="py-2 px-3 text-right">399.6</td>
+	                                <td class="py-2 px-3 text-center">4.5</td>
+	                                <td class="py-2 px-3 text-center">97.9</td>
+	                                <td class="py-2 px-3 text-center">7.4</td>
+	                                <td class="py-2 px-3 text-center">94.6</td>
+	                                <td class="py-2 px-3 text-center">13.1</td>
+	                                <td class="py-2 px-3 text-center">86.5</td>
+	                                <td class="py-2 px-3 text-center text-gray-400">--</td>
+	                                <td class="py-2 px-3 text-center text-gray-400">--</td>
+	                                <td class="py-2 px-3 text-center">6.6</td>
+	                                <td class="py-2 px-3 text-center">95.2</td>
+	                            </tr>
+	
+	                            <tr class="border-t border-gray-200">
+	                                <td class="py-2 px-3 font-medium" rowspan="3">DPT</td>
+	                                <td class="py-2 px-3" rowspan="3">584K</td>
+	                                <td class="py-2 px-3">ViT-S</td>
+	                                <td class="py-2 px-3 text-right">71.8</td>
+	                                <td class="py-2 px-3 text-center">8.4</td>
+	                                <td class="py-2 px-3 text-center">93.3</td>
+	                                <td class="py-2 px-3 text-center">10.8</td>
+	                                <td class="py-2 px-3 text-center">89.1</td>
+	                                <td class="py-2 px-3 text-center">12.7</td>
+	                                <td class="py-2 px-3 text-center">92.0</td>
+	                                <td class="py-2 px-3 text-center">8.3</td>
+	                                <td class="py-2 px-3 text-center">93.5</td>
+	                                <td class="py-2 px-3 text-center">26.0</td>
+	                                <td class="py-2 px-3 text-center">71.4</td>
+	                            </tr>
+	                            <tr>
+	                                <td class="py-2 px-3">ViT-B</td>
+	                                <td class="py-2 px-3 text-right">162.1</td>
+	                                <td class="py-2 px-3 text-center">7.5</td>
+	                                <td class="py-2 px-3 text-center">95.1</td>
+	                                <td class="py-2 px-3 text-center">10.8</td>
+	                                <td class="py-2 px-3 text-center">88.9</td>
+	                                <td class="py-2 px-3 text-center">10.0</td>
+	                                <td class="py-2 px-3 text-center">92.9</td>
+	                                <td class="py-2 px-3 text-center">7.1</td>
+	                                <td class="py-2 px-3 text-center">95.3</td>
+	                                <td class="py-2 px-3 text-center">24.5</td>
+	                                <td class="py-2 px-3 text-center">73.4</td>
+	                            </tr>
+	                            <tr>
+	                                <td class="py-2 px-3">ViT-L</td>
+	                                <td class="py-2 px-3 text-right">399.6</td>
+	                                <td class="py-2 px-3 text-center">6.1</td>
+	                                <td class="py-2 px-3 text-center"><strong>96.8</strong></td>
+	                                <td class="py-2 px-3 text-center">8.9</td>
+	                                <td class="py-2 px-3 text-center">92.5</td>
+	                                <td class="py-2 px-3 text-center">13.0</td>
+	                                <td class="py-2 px-3 text-center">94.9</td>
+	                                <td class="py-2 px-3 text-center">6.0</td>
+	                                <td class="py-2 px-3 text-center">97.0</td>
+	                                <td class="py-2 px-3 text-center">23.4</td>
+	                                <td class="py-2 px-3 text-center"><strong>73.9</strong></td>
+	                            </tr>
+	
+	                            <tr class="border-t border-gray-200">
+	                                <td class="py-2 px-3 font-bold text-indigo-600" rowspan="3">AnyDepth</td>
+	                                <td class="py-2 px-3" rowspan="3">369K</td>
+	                                <td class="py-2 px-3">ViT-S</td>
+	                                <td class="py-2 px-3 text-right">26.5</td>
+	                                <td class="py-2 px-3 text-center">8.2</td>
+	                                <td class="py-2 px-3 text-center">93.2</td>
+	                                <td class="py-2 px-3 text-center">10.2</td>
+	                                <td class="py-2 px-3 text-center">88.3</td>
+	                                <td class="py-2 px-3 text-center">8.4</td>
+	                                <td class="py-2 px-3 text-center">93.5</td>
+	                                <td class="py-2 px-3 text-center">8.0</td>
+	                                <td class="py-2 px-3 text-center">93.6</td>
+	                                <td class="py-2 px-3 text-center">24.7</td>
+	                                <td class="py-2 px-3 text-center">71.4</td>
+	                            </tr>
+	                            <tr>
+	                                <td class="py-2 px-3">ViT-B</td>
+	                                <td class="py-2 px-3 text-right">95.5</td>
+	                                <td class="py-2 px-3 text-center">7.2</td>
+	                                <td class="py-2 px-3 text-center">95.0</td>
+	                                <td class="py-2 px-3 text-center">9.7</td>
+	                                <td class="py-2 px-3 text-center">90.1</td>
+	                                <td class="py-2 px-3 text-center"><strong>8.0</strong></td>
+	                                <td class="py-2 px-3 text-center">94.5</td>
+	                                <td class="py-2 px-3 text-center">6.8</td>
+	                                <td class="py-2 px-3 text-center">95.6</td>
+	                                <td class="py-2 px-3 text-center">23.6</td>
+	                                <td class="py-2 px-3 text-center">72.7</td>
+	                            </tr>
+	                            <tr>
+	                                <td class="py-2 px-3">ViT-L</td>
+	                                <td class="py-2 px-3 text-right">313.4</td>
+	                                <td class="py-2 px-3 text-center"><strong>6.0</strong></td>
+	                                <td class="py-2 px-3 text-center"><strong>96.8</strong></td>
+	                                <td class="py-2 px-3 text-center"><strong>8.6</strong></td>
+	                                <td class="py-2 px-3 text-center"><strong>92.6</strong></td>
+	                                <td class="py-2 px-3 text-center">9.6</td>
+	                                <td class="py-2 px-3 text-center"><strong>95.4</strong></td>
+	                                <td class="py-2 px-3 text-center"><strong>5.4</strong></td>
+	                                <td class="py-2 px-3 text-center"><strong>97.4</strong></td>
+	                                <td class="py-2 px-3 text-center"><strong>22.6</strong></td>
+	                                <td class="py-2 px-3 text-center">73.6</td>
+	                            </tr>
+	                        </tbody>
+	                    </table>
+	                </div>
+
+
+	                <!-- Table: Affine-invariant Depth (Encoders & Decoders) -->
+	                <div class="glass-card rounded-3xl p-8 mb-12 section-fade overflow-x-auto">
+	                    <h3 class="text-xl font-bold text-gray-800 mb-2">
+	                        <i class="fa-solid fa-table text-indigo-500 mr-2"></i>
+	                        Quantitative Comparison of Zero-shot Affine-invariant Depth (Encoders &amp; Decoders)
+	                    </h3>
+	                    <p class="text-gray-600 text-sm mb-6">
+	                        <strong>Quantitative comparison of zero-shot affine-invariant depth estimation with different encoders and decoders.</strong>
+	                        Lower AbsRel values indicate better performance, while higher δ<sub>1</sub> values are better. We use ViT-B as the encoder for DAv2, ViT-L for DAv3, and VGGT-1B for VGGT. The encoder used pre-trained weights, and the decoder was randomly initialized. Bold numbers denote the better result.
+	                    </p>
+
+	                    <table class="booktabs-table w-full text-xs">
+	                        <thead>
+	                            <tr class="text-left">
+	                                <th class="py-3 px-3 font-bold" rowspan="2">Method</th>
+	                                <th class="py-3 px-3 font-bold" rowspan="2">Encoder</th>
+	                                <th class="py-3 px-3 font-bold" rowspan="2">Decoder</th>
+	                                <th class="py-3 px-3 font-bold text-center" colspan="2">NYUv2</th>
+	                                <th class="py-3 px-3 font-bold text-center" colspan="2">KITTI</th>
+	                                <th class="py-3 px-3 font-bold text-center" colspan="2">ETH3D</th>
+	                                <th class="py-3 px-3 font-bold text-center" colspan="2">ScanNet</th>
+	                                <th class="py-3 px-3 font-bold text-center" colspan="2">DIODE</th>
+	                            </tr>
+	                            <tr class="text-left">
+	                                <th class="py-2 px-3 font-bold text-center">AbsRel↓</th>
+	                                <th class="py-2 px-3 font-bold text-center">δ<sub>1</sub>↑</th>
+	                                <th class="py-2 px-3 font-bold text-center">AbsRel↓</th>
+	                                <th class="py-2 px-3 font-bold text-center">δ<sub>1</sub>↑</th>
+	                                <th class="py-2 px-3 font-bold text-center">AbsRel↓</th>
+	                                <th class="py-2 px-3 font-bold text-center">δ<sub>1</sub>↑</th>
+	                                <th class="py-2 px-3 font-bold text-center">AbsRel↓</th>
+	                                <th class="py-2 px-3 font-bold text-center">δ<sub>1</sub>↑</th>
+	                                <th class="py-2 px-3 font-bold text-center">AbsRel↓</th>
+	                                <th class="py-2 px-3 font-bold text-center">δ<sub>1</sub>↑</th>
+	                            </tr>
+	                        </thead>
+	                        <tbody>
+	                            <tr class="border-t border-gray-200">
+	                                <td class="py-2 px-3 font-medium" rowspan="2">DAv2</td>
+	                                <td class="py-2 px-3" rowspan="2">ViT-B</td>
+	                                <td class="py-2 px-3">DPT</td>
+	                                <td class="py-2 px-3 text-center">5.8</td>
+	                                <td class="py-2 px-3 text-center">96.2</td>
+	                                <td class="py-2 px-3 text-center"><strong>10.4</strong></td>
+	                                <td class="py-2 px-3 text-center">89.1</td>
+	                                <td class="py-2 px-3 text-center">8.8</td>
+	                                <td class="py-2 px-3 text-center">94.6</td>
+	                                <td class="py-2 px-3 text-center">6.2</td>
+	                                <td class="py-2 px-3 text-center">95.3</td>
+	                                <td class="py-2 px-3 text-center"><strong>23.4</strong></td>
+	                                <td class="py-2 px-3 text-center">73.8</td>
+	                            </tr>
+	                            <tr>
+	                                <td class="py-2 px-3">SDT</td>
+	                                <td class="py-2 px-3 text-center"><strong>5.6</strong></td>
+	                                <td class="py-2 px-3 text-center"><strong>96.4</strong></td>
+	                                <td class="py-2 px-3 text-center">10.7</td>
+	                                <td class="py-2 px-3 text-center"><strong>89.6</strong></td>
+	                                <td class="py-2 px-3 text-center"><strong>7.5</strong></td>
+	                                <td class="py-2 px-3 text-center"><strong>95.8</strong></td>
+	                                <td class="py-2 px-3 text-center"><strong>6.1</strong></td>
+	                                <td class="py-2 px-3 text-center"><strong>95.4</strong></td>
+	                                <td class="py-2 px-3 text-center">23.9</td>
+	                                <td class="py-2 px-3 text-center"><strong>73.9</strong></td>
+	                            </tr>
+
+	                            <tr class="border-t border-gray-200">
+	                                <td class="py-2 px-3 font-medium" rowspan="3">DAv3</td>
+	                                <td class="py-2 px-3" rowspan="3">ViT-L</td>
+	                                <td class="py-2 px-3">DPT</td>
+	                                <td class="py-2 px-3 text-center"><strong>4.9</strong></td>
+	                                <td class="py-2 px-3 text-center">96.9</td>
+	                                <td class="py-2 px-3 text-center"><strong>8.8</strong></td>
+	                                <td class="py-2 px-3 text-center"><strong>92.4</strong></td>
+	                                <td class="py-2 px-3 text-center">6.9</td>
+	                                <td class="py-2 px-3 text-center">95.9</td>
+	                                <td class="py-2 px-3 text-center">5.0</td>
+	                                <td class="py-2 px-3 text-center"><strong>96.6</strong></td>
+	                                <td class="py-2 px-3 text-center">22.5</td>
+	                                <td class="py-2 px-3 text-center">74.6</td>
+	                            </tr>
+	                            <tr>
+	                                <td class="py-2 px-3">Dual-DPT</td>
+	                                <td class="py-2 px-3 text-center"><strong>4.9</strong></td>
+	                                <td class="py-2 px-3 text-center">97.0</td>
+	                                <td class="py-2 px-3 text-center">8.9</td>
+	                                <td class="py-2 px-3 text-center"><strong>92.4</strong></td>
+	                                <td class="py-2 px-3 text-center">7.0</td>
+	                                <td class="py-2 px-3 text-center">95.8</td>
+	                                <td class="py-2 px-3 text-center"><strong>4.9</strong></td>
+	                                <td class="py-2 px-3 text-center"><strong>96.6</strong></td>
+	                                <td class="py-2 px-3 text-center">22.3</td>
+	                                <td class="py-2 px-3 text-center">74.6</td>
+	                            </tr>
+	                            <tr>
+	                                <td class="py-2 px-3">SDT</td>
+	                                <td class="py-2 px-3 text-center"><strong>4.9</strong></td>
+	                                <td class="py-2 px-3 text-center"><strong>97.1</strong></td>
+	                                <td class="py-2 px-3 text-center">8.9</td>
+	                                <td class="py-2 px-3 text-center"><strong>92.4</strong></td>
+	                                <td class="py-2 px-3 text-center"><strong>5.8</strong></td>
+	                                <td class="py-2 px-3 text-center"><strong>96.6</strong></td>
+	                                <td class="py-2 px-3 text-center">5.0</td>
+	                                <td class="py-2 px-3 text-center"><strong>96.6</strong></td>
+	                                <td class="py-2 px-3 text-center"><strong>21.9</strong></td>
+	                                <td class="py-2 px-3 text-center"><strong>74.9</strong></td>
+	                            </tr>
+
+	                            <tr class="border-t border-gray-200">
+	                                <td class="py-2 px-3 font-medium" rowspan="2">VGGT</td>
+	                                <td class="py-2 px-3" rowspan="2">VGGT-1B</td>
+	                                <td class="py-2 px-3">DPT</td>
+	                                <td class="py-2 px-3 text-center"><strong>4.8</strong></td>
+	                                <td class="py-2 px-3 text-center">97.7</td>
+	                                <td class="py-2 px-3 text-center">15.6</td>
+	                                <td class="py-2 px-3 text-center">77.9</td>
+	                                <td class="py-2 px-3 text-center">7.2</td>
+	                                <td class="py-2 px-3 text-center">94.7</td>
+	                                <td class="py-2 px-3 text-center"><strong>4.6</strong></td>
+	                                <td class="py-2 px-3 text-center">97.6</td>
+	                                <td class="py-2 px-3 text-center">30.7</td>
+	                                <td class="py-2 px-3 text-center">76.2</td>
+	                            </tr>
+	                            <tr>
+	                                <td class="py-2 px-3">SDT</td>
+	                                <td class="py-2 px-3 text-center"><strong>4.8</strong></td>
+	                                <td class="py-2 px-3 text-center"><strong>98.0</strong></td>
+	                                <td class="py-2 px-3 text-center"><strong>15.5</strong></td>
+	                                <td class="py-2 px-3 text-center"><strong>80.1</strong></td>
+	                                <td class="py-2 px-3 text-center"><strong>7.0</strong></td>
+	                                <td class="py-2 px-3 text-center"><strong>95.1</strong></td>
+	                                <td class="py-2 px-3 text-center"><strong>4.6</strong></td>
+	                                <td class="py-2 px-3 text-center"><strong>98.0</strong></td>
+	                                <td class="py-2 px-3 text-center"><strong>30.6</strong></td>
+	                                <td class="py-2 px-3 text-center"><strong>76.8</strong></td>
+	                            </tr>
+	                        </tbody>
+	                    </table>
+	                </div>
+
+                <!-- Table 2 & 3: Side by side -->
+                <div class="grid md:grid-cols-2 gap-8">
+                    <!-- Table 2: Multi-resolution Efficiency -->
+                    <div class="glass-card rounded-3xl p-6 section-fade">
+                        <h3 class="text-lg font-bold text-gray-800 mb-2">
+                            <i class="fa-solid fa-gauge-high text-indigo-500 mr-2"></i>
+                            Multi-resolution Efficiency
+                        </h3>
+                        <p class="text-gray-600 text-sm mb-4">
+                            Multi-resolution efficiency comparison of SDT and DPT heads under a ViT-L encoder. Latency is averaged over 1000 runs on an NVIDIA H100 GPU. Lower is better.
+                        </p>
+
+                        <table class="booktabs-table w-full text-sm">
+                            <thead>
+                                <tr class="text-left">
+                                    <th class="py-2 px-3 font-bold">Resolution</th>
+                                    <th class="py-2 px-3 font-bold">Decoder</th>
+                                    <th class="py-2 px-3 font-bold text-right">FLOPs (G)↓</th>
+                                    <th class="py-2 px-3 font-bold text-right">Latency (ms)↓</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="py-2 px-3 font-medium" rowspan="2">256&times;256</td>
+                                    <td class="py-2 px-3">DPT</td>
+                                    <td class="py-2 px-3 text-right">444.14</td>
+                                    <td class="py-2 px-3 text-right">6.66 &plusmn; 0.22</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2 px-3 font-bold text-indigo-600">SDT (Ours)</td>
+                                    <td class="py-2 px-3 text-right font-bold">234.17</td>
+                                    <td class="py-2 px-3 text-right font-bold">6.10 &plusmn; 0.33</td>
+                                </tr>
+                                <tr class="border-t border-gray-200">
+                                    <td class="py-2 px-3 font-medium" rowspan="2">512&times;512</td>
+                                    <td class="py-2 px-3">DPT</td>
+                                    <td class="py-2 px-3 text-right">1776.56</td>
+                                    <td class="py-2 px-3 text-right">24.65 &plusmn; 0.22</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2 px-3 font-bold text-indigo-600">SDT (Ours)</td>
+                                    <td class="py-2 px-3 text-right font-bold">936.70</td>
+                                    <td class="py-2 px-3 text-right font-bold">23.17 &plusmn; 0.54</td>
+                                </tr>
+                                <tr class="border-t border-gray-200">
+                                    <td class="py-2 px-3 font-medium" rowspan="2">1024&times;1024</td>
+                                    <td class="py-2 px-3">DPT</td>
+                                    <td class="py-2 px-3 text-right">7106.22</td>
+                                    <td class="py-2 px-3 text-right">99.79 &plusmn; 0.79</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2 px-3 font-bold text-indigo-600">SDT (Ours)</td>
+                                    <td class="py-2 px-3 text-right font-bold">3746.79</td>
+                                    <td class="py-2 px-3 text-right font-bold">93.09 &plusmn; 0.51</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Table 3: Decoder Parameters -->
+                    <div class="glass-card rounded-3xl p-6 section-fade">
+                        <h3 class="text-lg font-bold text-gray-800 mb-2">
+                            <i class="fa-solid fa-microchip text-indigo-500 mr-2"></i>
+                            Decoder Parameters
+                        </h3>
+                        <p class="text-gray-600 text-sm mb-4">
+                            Decoder parameter comparison across different ViT backbones. Lower is better.
+                        </p>
+
+                        <table class="booktabs-table w-full text-sm">
+                            <thead>
+                                <tr class="text-left">
+                                    <th class="py-2 px-3 font-bold">Decoder</th>
+                                    <th class="py-2 px-3 font-bold">ViT Backbone</th>
+                                    <th class="py-2 px-3 font-bold text-right">Params (M)↓</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="py-2 px-3 font-medium" rowspan="3">DPT</td>
+                                    <td class="py-2 px-3">ViT-S</td>
+                                    <td class="py-2 px-3 text-right">50.83</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2 px-3">ViT-B</td>
+                                    <td class="py-2 px-3 text-right">76.05</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2 px-3">ViT-L</td>
+                                    <td class="py-2 px-3 text-right">99.58</td>
+                                </tr>
+                                <tr class="border-t border-gray-200">
+                                    <td class="py-2 px-3 font-bold text-indigo-600" rowspan="3">SDT</td>
+                                    <td class="py-2 px-3">ViT-S</td>
+                                    <td class="py-2 px-3 text-right font-bold">5.51</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2 px-3">ViT-B</td>
+                                    <td class="py-2 px-3 text-right font-bold">9.45</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2 px-3">ViT-L</td>
+                                    <td class="py-2 px-3 text-right font-bold">13.38</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="py-16 px-6">
+            <div class="max-w-4xl mx-auto text-center">
+                <div class="glass-card rounded-3xl p-8">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">Citation</h3>
+                    <div class="bg-white/50 rounded-xl p-4 text-left font-mono text-sm text-gray-600 overflow-x-auto">
+                        <pre>@article{ren2026anydepth,
+  title={AnyDepth: Depth Estimation Made Easy},
+  author={Ren, Zeyu and Zhang, Zeyu and Li, Wukai and Liu, Qingxiang and Tang, Hao},
+  journal={arXiv preprint arXiv:2601.02760},
+  year={2026}
+}
+</pre>
+                    </div>
+
+                    <p class="text-gray-500 text-sm mt-6">
+                        © 2025 AnyDepth. All rights reserved.
+                    </p>
+                </div>
+            </div>
+        </footer>
+    </main>
+
+    <!-- JavaScript for Interactivity -->
+    <script>
+        // Intersection Observer for section animations
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.section-fade').forEach(el => {
+            observer.observe(el);
+        });
+
+
+    </script>
+</body>
+</html>
