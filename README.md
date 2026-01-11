@@ -2,8 +2,6 @@
 
 > *"Simplicity is prerequisite for reliability." --- Edsger W. Dijkstra*
 
-A lightweight decoder head for zero-shot monocular depth estimation.
-
 ![teaser](./assets/teaser.png)
 
 > **AnyDepth: Depth Estimation Made Easy**
