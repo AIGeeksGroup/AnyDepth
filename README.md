@@ -76,18 +76,21 @@ head = SDTHead(
 
 *Metric: AbsRel % (lower is better)*
 
-### SDT as Drop-in Replacement for DPT
+### Zero-Shot Affine-Invariant Depth Estimation with Different Encoders and Decoders
+
+We fine-tune on Hypersim and Virtual KITTI with depth foundation models (DAv2, DAv3, VGGT).
 
 | Method | Encoder | Decoder | NYUv2 | KITTI | ETH3D | ScanNet | DIODE |
 |--------|---------|---------|-------|-------|-------|---------|-------|
 | DAv2 | ViT-B | DPT | 5.8 | **10.4** | 8.8 | 6.2 | **23.4** |
 | DAv2 | ViT-B | **SDT** | **5.6** | 10.7 | **7.5** | **6.1** | 23.9 |
-| DAv3 | ViT-L | DPT | 4.9 | **8.8** | 6.9 | 5.0 | 22.5 |
-| DAv3 | ViT-L | **SDT** | 4.9 | 8.9 | **5.8** | 5.0 | **21.9** |
-| VGGT | VGGT-1B | DPT | 4.8 | 15.6 | 7.2 | 4.6 | 30.7 |
-| VGGT | VGGT-1B | **SDT** | 4.8 | **15.5** | **7.0** | 4.6 | **30.6** |
+| DAv3 | ViT-L | DPT | **4.9** | **8.8** | 6.9 | 5.0 | 22.5 |
+| DAv3 | ViT-L | Dual-DPT | **4.9** | 8.9 | 7.0 | **4.9** | 22.3 |
+| DAv3 | ViT-L | **SDT** | **4.9** | 8.9 | **5.8** | 5.0 | **21.9** |
+| VGGT | VGGT-1B | DPT | **4.8** | 15.6 | 7.2 | **4.6** | 30.7 |
+| VGGT | VGGT-1B | **SDT** | **4.8** | **15.5** | **7.0** | **4.6** | **30.6** |
 
-*Metric: AbsRel % (lower is better). SDT consistently matches or outperforms DPT across all encoders.*
+*Metric: AbsRel % (lower is better). The encoder used pre-trained weights, and the decoder was randomly initialized.*
 
 ## 🚀 Real-World Deployment
 
