@@ -78,15 +78,15 @@ head = SDTHead(
 
 ### Zero-Shot Affine-Invariant Depth Estimation with Different Encoders and Decoders
 
-We fine-tune on Hypersim and Virtual KITTI with depth foundation models (DAv2, DAv3, VGGT).
+We fine-tune on Hypersim and Virtual KITTI with depth foundation models (DAv2, DA3, VGGT).
 
 | Method | Encoder | Decoder | NYUv2 | KITTI | ETH3D | ScanNet | DIODE |
 |--------|---------|---------|-------|-------|-------|---------|-------|
 | DAv2 | ViT-B | DPT | 5.8 | **10.4** | 8.8 | 6.2 | **23.4** |
 | DAv2 | ViT-B | **SDT** | **5.6** | 10.7 | **7.5** | **6.1** | 23.9 |
-| DAv3 | ViT-L | DPT | **4.9** | **8.8** | 6.9 | 5.0 | 22.5 |
-| DAv3 | ViT-L | Dual-DPT | **4.9** | 8.9 | 7.0 | **4.9** | 22.3 |
-| DAv3 | ViT-L | **SDT** | **4.9** | 8.9 | **5.8** | 5.0 | **21.9** |
+| DA3 | ViT-L | DPT | **4.9** | **8.8** | 6.9 | 5.0 | 22.5 |
+| DA3 | ViT-L | Dual-DPT | **4.9** | 8.9 | 7.0 | **4.9** | 22.3 |
+| DA3 | ViT-L | **SDT** | **4.9** | 8.9 | **5.8** | 5.0 | **21.9** |
 | VGGT | VGGT-1B | DPT | **4.8** | 15.6 | 7.2 | **4.6** | 30.7 |
 | VGGT | VGGT-1B | **SDT** | **4.8** | **15.5** | **7.0** | **4.6** | **30.6** |
 
@@ -119,7 +119,7 @@ If you find our code or paper helpful, please consider starring ⭐ us and citin
 
 - [DINOv2](https://github.com/facebookresearch/dinov2) / [DINOv3](https://github.com/facebookresearch/dinov3)
 - [Depth Anything V2](https://github.com/DepthAnything/Depth-Anything-V2)
-- [Depth Anything V3](https://github.com/ByteDance-Seed/Depth-Anything-3)
+- [Depth Anything 3](https://github.com/ByteDance-Seed/Depth-Anything-3)
 - [VGGT](https://github.com/facebookresearch/vggt)
 - [DySample](https://arxiv.org/abs/2308.15085)
 - [DPT](https://github.com/isl-org/DPT)
