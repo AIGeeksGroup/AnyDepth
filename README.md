@@ -6,13 +6,13 @@
 
 > **AnyDepth: Depth Estimation Made Easy**
 >
-> Zeyu Ren<sup>1*</sup>, Zeyu Zhang<sup>2*†</sup>, Wukai Li<sup>2</sup>, Qingxiang Liu<sup>3</sup>, Hao Tang<sup>2‡</sup>
+> Zeyu Ren<sup>1*</sup>, [Zeyu Zhang](https://steve-zeyu-zhang.github.io/)<sup>2*†</sup>, Wukai Li<sup>2</sup>, Qingxiang Liu<sup>3</sup>, Hao Tang<sup>2‡</sup>
 >
 > <sup>1</sup>The University of Melbourne, <sup>2</sup>Peking University, <sup>3</sup>Shanghai University of Engineering Science
 >
 > <sup>*</sup>Equal contribution. <sup>†</sup>Project lead. <sup>‡</sup>Corresponding author.
 >
-> ### [Paper](https://arxiv.org/abs/2601.02760) | [Website](https://aigeeksgroup.github.io/AnyDepth)
+> ### [Paper](https://arxiv.org/abs/2601.02760) | [Website](https://aigeeksgroup.github.io/AnyDepth) | [Model](https://huggingface.co/AIGeeksGroup/AnyDepth)
 
 ## 🏃 Intro
 
