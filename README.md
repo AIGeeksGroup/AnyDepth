@@ -12,7 +12,7 @@
 >
 > <sup>*</sup>Equal contribution. <sup>†</sup>Project lead. <sup>‡</sup>Corresponding author.
 >
-> ### [Paper](https://arxiv.org/abs/2601.02760) | [Website](https://aigeeksgroup.github.io/AnyDepth) | [Model](https://huggingface.co/AIGeeksGroup/AnyDepth)
+> ### [Paper](https://arxiv.org/abs/2601.02760) | [Website](https://aigeeksgroup.github.io/AnyDepth) | [Model](https://huggingface.co/AIGeeksGroup/AnyDepth) | [HF Paper](https://huggingface.co/papers/2601.02760)
 
 ## 🏃 Intro
 
