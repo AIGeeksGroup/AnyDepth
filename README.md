@@ -51,13 +51,29 @@ head = SDTHead(
 
 ![DPT_SDT](./assets/DPT_SDT.png)
 
-| Decoder | ViT-S Params | ViT-B Params | ViT-L Params |
-|---------|-------------|-------------|-------------|
-| DPT     | 35.5M | 43.7M | 123.3M |
-| SDT     | 5.4M | 8.3M | 13.3M |
-| **Reduction** | **85%** | **81%** | **89%** |
-
 **Key Difference**: DPT uses a reassemble-fusion strategy (per-layer reassembly + cross-scale fusion), while SDT uses a fusion-reassemble strategy (fuse tokens first, then single-path upsampling).
+
+### Decoder Parameters
+
+| Decoder | ViT Backbone | Params (M) |
+|---------|--------------|------------|
+| DPT | ViT-S | 50.83 |
+| DPT | ViT-B | 76.05 |
+| DPT | ViT-L | 99.58 |
+| **SDT** | ViT-S | **5.51** |
+| **SDT** | ViT-B | **9.45** |
+| **SDT** | ViT-L | **13.38** |
+
+### Multi-Resolution Efficiency (ViT-L, H100 GPU)
+
+| Resolution | Decoder | FLOPs (G) | Latency (ms) |
+|------------|---------|-----------|--------------|
+| 256×256 | DPT | 444.14 | 6.66 ± 0.22 |
+| 256×256 | **SDT (Ours)** | **234.17** | **6.10 ± 0.33** |
+| 512×512 | DPT | 1776.56 | 24.65 ± 0.22 |
+| 512×512 | **SDT (Ours)** | **936.70** | **23.17 ± 0.54** |
+| 1024×1024 | DPT | 7106.22 | 99.79 ± 0.79 |
+| 1024×1024 | **SDT (Ours)** | **3746.79** | **93.09 ± 0.51** |
 
 ## 🧪 Zero-Shot Depth Estimation Results
 
