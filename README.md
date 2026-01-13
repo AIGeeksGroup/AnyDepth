@@ -61,6 +61,18 @@ head = SDTHead(
 )
 ```
 
+## 📦 Datasets
+
+We provide the training splits (369K samples) in the `datasets/` folder. To prepare the data:
+
+1. **Hypersim & Virtual KITTI**: Follow the instructions from [Lotus](https://github.com/EnVision-Research/Lotus) to download and prepare these datasets.
+
+2. **IRS**: Follow the official instructions at [IRS](https://github.com/blackjack2015/IRS).
+
+3. **BlendedMVS**: Follow the official instructions at [BlendedMVS](https://github.com/YoYo000/BlendedMVS).
+
+4. **TartanAir**: Follow the official instructions at [TartanAir](https://github.com/castacks/tartanair_tools).
+
 ## 📊 SDT vs DPT
 
 ![DPT_SDT](./assets/DPT_SDT.png)
