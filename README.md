@@ -14,6 +14,20 @@
 >
 > ### [Paper](https://arxiv.org/abs/2601.02760) | [Website](https://aigeeksgroup.github.io/AnyDepth) | [Model](https://huggingface.co/AIGeeksGroup/AnyDepth) | [HF Paper](https://huggingface.co/papers/2601.02760)
 
+## ✏️ Citation
+
+If you find our code or paper helpful, please consider starring ⭐ us and citing:
+
+```bibtex
+@article{ren2026anydepth,
+  title={AnyDepth: Depth Estimation Made Easy},
+  author={Ren, Zeyu and Zhang, Zeyu and Li, Wukai and Liu, Qingxiang and Tang, Hao},
+  journal={arXiv preprint arXiv:2601.02760},
+  year={2026}
+}
+```
+
+
 ## 🏃 Intro
 
 We present **AnyDepth**, a simple and efficient training framework for zero-shot monocular depth estimation. The core contribution is the **Simple Depth Transformer (SDT)**, a compact decoder that achieves comparable accuracy to DPT while reducing parameters by **85%--89%**.
@@ -116,18 +130,6 @@ SDT has been tested on **Jetson Orin Nano (4GB)**:
 | 256×256 | **SDT (Ours)** | **213.35** | **4.7** |
 | 512×512 | DPT | 1107.64 | 0.9 |
 | 512×512 | **SDT (Ours)** | **831.48** | **1.2** |
-
-## ✏️ Citation
-
-If you find our code or paper helpful, please consider starring ⭐ us and citing:
-
-```bibtex
-@article{ren2026anydepth,
-  title={AnyDepth: Depth Estimation Made Easy},
-  author={Ren, Zeyu and Zhang, Zeyu and Li, Wukai and Liu, Qingxiang and Tang, Hao},
-  year={2026}
-}
-```
 
 ## 😘 Acknowledgement
 
