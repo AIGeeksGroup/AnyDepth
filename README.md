@@ -151,3 +151,7 @@ SDT has been tested on **Jetson Orin Nano (4GB)**:
 - [VGGT](https://github.com/facebookresearch/vggt)
 - [DySample](https://arxiv.org/abs/2308.15085)
 - [DPT](https://github.com/isl-org/DPT)
+
+## 📜 License
+
+This work is licensed under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/).
