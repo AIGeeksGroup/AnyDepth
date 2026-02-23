@@ -61,6 +61,15 @@ head = SDTHead(
 )
 ```
 
+## ⚖️ Weights
+
+We release two SDT decoder weights fine-tuned on Depth Anything V2 and Depth Anything 3:
+
+| Model | Encoder | Decoder | Link |
+|-------|---------|---------|------|
+| DAv2 + SDT | ViT-B | SDT | [Download](https://huggingface.co/AIGeeksGroup/AnyDepth/resolve/main/dav2_sdt_vitb.pth) |
+| DA3 + SDT | ViT-L | SDT | [Download](https://huggingface.co/AIGeeksGroup/AnyDepth/resolve/main/da3_sdt_vitl.pth) |
+
 ## 📦 Datasets
 
 We provide the training splits (369K samples) in the `datasets/` folder. To prepare the data:
